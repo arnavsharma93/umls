@@ -1,0 +1,77 @@
+
+#+begin_src plantuml :file images/reg_replay.png
+  actor Developer
+
+  title RM Replay Flow
+
+  autonumber
+  Developer -> RM: replay
+  RM -> Banker: process
+  Banker -> Blackhole: request
+  Blackhole -> Banker: response
+  Banker -->> BookkeeperActual:  add
+  BookkeeperActual -->> BookkeeperActual: store
+  Banker -> RM: return
+  RM -->> RM: store error
+  RM -->> RM: assert expectations
+  RM -> Developer: results
+#+end_src
+
+#+RESULTS:
+[[file:images/reg_replay.png]]
+
+#+begin_src plantuml :file images/reg_capture.png
+  actor Developer
+
+  title RM Capture Flow
+
+  autonumber
+  Developer -> RM: capture
+  RM -> Banker: process
+  Banker -> Blackhole: request
+  Banker -> Cerberus: request
+  Cerberus -> Blackhole: response
+  Blackhole -> Banker: response
+  Banker -->> BookkeeperActual:  add
+  BookkeeperActual -->> BookkeeperActual: store
+  Banker -> RM: return
+  RM -->> RM: store error
+  RM -> Developer: captured
+#+end_src
+
+#+RESULTS:
+[[file:images/reg_capture.png]]
+
+#+begin_src plantuml :file images/blackhole_replay.png
+  actor Banker
+
+  title Blackhole Replay Flow
+
+  autonumber
+  Banker -> Thrift: thrift encoded request body
+  Thrift -> YARPC: transport request
+  YARPC -> Blackhole:  middleware
+  Blackhole -->> Blackhole: retrieve
+  Blackhole -> Banker: response
+#+end_src
+
+#+RESULTS:
+[[file:images/blackhole_replay.png]]
+
+#+begin_src plantuml :file images/blackhole_capture.png
+  actor Banker
+
+  title Blackhole Capture Flow
+
+  autonumber
+  Banker -> Thrift: thrift encoded request body
+  Thrift -> YARPC: transport request
+  YARPC -> Blackhole:  middleware
+  Blackhole -> Cerberus: forwards
+  Cerberus -> Blackhole: response
+  Blackhole -->> Blackhole: store
+  Blackhole -> Banker: response
+#+end_src
+
+#+RESULTS:
+[[file:images/blackhole_capture.png]]
